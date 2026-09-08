@@ -1,3 +1,29 @@
+// SVELTEKIT-BACKEND-PRESERVED: moved out of svelte/ during the cljs migration; not wired.
+//
+// Moved verbatim (only this header comment added) from
+// `svelte/src/routes/xrpc/[...path]/+server.ts`, the SvelteKit server-route
+// file that was the actual deployed XRPC handler under the old
+// `wrangler.jsonc` `main` (which pointed at the SvelteKit Cloudflare
+// adapter build output, `svelte/.svelte-kit/cloudflare/_worker.js`). It
+// proxies an XRPC method call (any nsid under `/xrpc/*`) to the AgentGateway
+// MCP router at `AGENTGATEWAY_MCP_ROUTER_URL` via JSON-RPC `tools/call`.
+//
+// This repo already has a separate, non-Svelte production Worker facade at
+// `src/app.ts` — it implements the 6 `com.etzhayyim.apps.meetingRecorder.*`
+// XRPC procedures directly (joinMeeting / leaveMeeting / getSession /
+// listSessions / getTranscript / getMinutes) with its own consent/HMAC/DID
+// auth, and dispatches to the Vultr media-plane, not to the MCP router this
+// file proxies to. `src/app.ts` does NOT call `env.ASSETS.fetch(...)`
+// anywhere, so this migration's wrangler.jsonc drops the `main` key
+// entirely (see that file's header comment) rather than pointing `main` at
+// either Worker — neither of them currently serves the static asset bundle.
+//
+// This file is NOT wired into wrangler.jsonc as `main`. It still imports
+// from `@sveltejs/kit` and `./$types`, neither of which resolves now that
+// the SvelteKit toolchain (`svelte/`) has been removed, so it will not run
+// as-is. Whether to revive it (e.g. as a `/xrpc/*` catch-all fallback ahead
+// of or behind `src/app.ts`'s own routes, reconciling the two upstreams) is
+// an open product decision, not made here.
 import { json, type RequestEvent } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
